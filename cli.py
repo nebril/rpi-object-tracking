@@ -146,6 +146,45 @@ def track(label, loglevel, edge_tpu, rotation):
     return pantilt_process_manager(model_cls, labels=(label,),  rotation=rotation)
 
 
+@cli.command()
+@click.argument('label', type=str, default='person')
+@click.option('--loglevel', required=False, type=str, default='WARNING', help='Pass --loglevel=DEBUG to inspect FPS and tracking centroid X/Y coordinates')
+@click.option('--edge-tpu', is_flag=True, required=False, type=bool, default=False, help='Accelerate inferences using Coral USB Edge TPU')
+@click.option('--rotation', default=0, type=int, help='PiCamera rotation. If you followed this guide, a rotation value of 0 is correct. https://medium.com/@grepLeigh/real-time-object-tracking-with-tensorflow-raspberry-pi-and-pan-tilt-hat-2aeaef47e134')
+def seek(label, loglevel, edge_tpu, rotation):
+    '''
+        rpi-deep-pantilt seel [OPTIONS] [LABEL]
+
+        LABEL (required)
+            Exactly one label to detect, for example:
+            $ rpi-deep-pantilt track person
+
+        Track command will automatically load the appropriate model
+
+        For example, providing "face" will initalize FaceSSD_MobileNet_V2 model
+        $ rpi-deep-pantilt track face
+
+        Other labels use SSDMobileNetV3 model with COCO labels
+        $ rpi-deep-pantilt detect orange
+    '''
+    level = logging.getLevelName(loglevel)
+    logging.getLogger().setLevel(level)
+
+    validate_labels((label,))
+
+    if label == 'face':
+        if edge_tpu:
+            model_cls = FaceSSD_MobileNet_V2_EdgeTPU
+        else:
+            model_cls = FaceSSD_MobileNet_V2
+    else:
+        if edge_tpu:
+            model_cls = SSDMobileNet_V3_Coco_EdgeTPU_Quant
+        else:
+            model_cls = SSDMobileNet_V3_Small_Coco_PostProcessed
+
+    return seek_process_manager(model_cls, labels=(label,),  rotation=rotation)
+
 @cli.group()
 def test():
     pass
@@ -167,10 +206,8 @@ def camera(loglevel, rotation):
     logging.getLogger().setLevel(level)
     return camera_test(rotation)
 
-
 def main():
     cli()
-
 
 if __name__ == "__main__":
     main()
