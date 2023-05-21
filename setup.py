@@ -66,11 +66,11 @@ TRAINER_DARWIN_CUSTOM_COMMANDS = [['brew', 'update'],
 
 # $pip install rpi-deep-pantilt==1.0.0rc3
 # ERROR: Packages installed from PyPI cannot depend on packages which are not also hosted on PyPI.
-# rpi-deep-pantilt depends on tensorflow@ https://github.com/leigh-johnson/Tensorflow-bin/blob/master/tensorflow-2.0.0-cp37-cp37m-linux_armv7l.whl?raw=true;platform_machine=="armv7l"
+# rpi-deep-pantilt depends on tensorflow@ https://github.com/lhelontra/tensorflow-on-arm/releases/download/v2.4.0/tensorflow-2.4.0-cp37-none-linux_armv7l.whl?raw=true;platform_machine=="armv7l"
 class PostInstall(install):
 
     def run(self):
-        deps = 'https://github.com/leigh-johnson/Tensorflow-bin/releases/download/v2.2.0/tensorflow-2.2.0-cp37-cp37m-linux_armv7l.whl'
+        deps = 'https://github.com/lhelontra/tensorflow-on-arm/releases/download/v2.4.0/tensorflow-2.4.0-cp37-none-linux_armv7l.whl'
 
         install.run(self)
         # https://pip.pypa.io/en/stable/user_guide/#using-pip-from-your-program
