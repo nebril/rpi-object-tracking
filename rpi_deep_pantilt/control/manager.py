@@ -136,3 +136,56 @@ def pantilt_process_manager(
 
 if __name__ == '__main__':
     pantilt_process_manager()
+
+
+def seek_process_manager(
+    model_cls,
+    labels=('person',),
+    rotation=0
+):
+
+    with Manager() as manager:
+        # set initial bounding box (x, y)-coordinates to center of frame
+        center_x = manager.Value('i', 0)
+        center_y = manager.Value('i', 0)
+
+        center_x.value = RESOLUTION[0] // 2
+        center_y.value = RESOLUTION[1] // 2
+
+        # pan and tilt angles updated by independent PID processes
+        #pan = manager.Value('i', 0)
+        #tilt = manager.Value('i', 0)
+
+        # PID gains for panning
+
+        pan_p = manager.Value('f', 0.05)
+        # 0 time integral gain until inferencing is faster than ~50ms
+        pan_i = manager.Value('f', 0.1)
+        pan_d = manager.Value('f', 0)
+
+        # PID gains for tilting
+        tilt_p = manager.Value('f', 0.15)
+        # 0 time integral gain until inferencing is faster than ~50ms
+        tilt_i = manager.Value('f', 0.2)
+        tilt_d = manager.Value('f', 0)
+
+        detect_processr = Process(target=run_pantilt_detect,
+                                  args=(center_x, center_y, labels, model_cls, rotation))
+
+        #pan_process = Process(target=pid_process,
+        #                      args=(pan, pan_p, pan_i, pan_d, center_x, CENTER[0], 'pan'))
+
+        #tilt_process = Process(target=pid_process,
+        #                       args=(tilt, tilt_p, tilt_i, tilt_d, center_y, CENTER[1], 'tilt'))
+
+        #servo_process = Process(target=set_servos, args=(pan, tilt))
+
+        detect_processr.start()
+        #pan_process.start()
+        #tilt_process.start()
+        #servo_process.start()
+
+        detect_processr.join()
+        #pan_process.join()
+        #tilt_process.join()
+        #servo_process.join()

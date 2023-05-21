@@ -17,7 +17,7 @@ from rpi_deep_pantilt.detect.facessd_mobilenet_v2 import (
     FaceSSD_MobileNet_V2_EdgeTPU,
     LABELS as FaceSSDLabels
 )
-from rpi_deep_pantilt.control.manager import pantilt_process_manager
+from rpi_deep_pantilt.control.manager import pantilt_process_manager, seek_process_manager
 from rpi_deep_pantilt.control.hardware_test import pantilt_test, camera_test
 
 
