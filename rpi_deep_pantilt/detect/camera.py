@@ -11,6 +11,8 @@ from threading import Thread
 logging.basicConfig()
 LOGLEVEL = logging.getLogger().getEffectiveLevel()
 
+DETECTION_TRESHOLD = 0.5
+
 RESOLUTION = (320, 320)
 
 logging.basicConfig()
@@ -38,19 +40,31 @@ def run_pantilt_detect(center_x, center_y, labels, model_cls, rotation, resoluti
             prediction = model.predict(frame)
 
             if not len(prediction.get('detection_boxes')):
+                center_x.value = -1
+                center_y.value = -1
+                logging.info(
+                    f'Tracking lost')
                 continue
 
-            if any(item in label_idxs for item in prediction.get('detection_classes')):
+            classes = enumerate(prediction.get('detection_classes'))
+            scores = prediction.get('detection_scores')
 
-                tracked = (
-                    (i, x) for i, x in
-                    enumerate(prediction.get('detection_classes'))
-                    if x in label_idxs
-                )
-                tracked_idxs, tracked_classes = zip(*tracked)
+            tracked = next((
+                (i, x) for i, x in
+                classes
+                if x in label_idxs and scores[i] > DETECTION_TRESHOLD
+            ), False)
+
+            if tracked == False:
+                center_x.value = -1
+                center_y.value = -1
+                logging.info(
+                    f'Tracking lost')
+            else:
+                (tracked_idx, tracked_class) = tracked
 
                 track_target = prediction.get('detection_boxes')[
-                    tracked_idxs[0]]
+                    tracked_idx]
                 # [ymin, xmin, ymax, xmax]
                 y = int(
                     RESOLUTION[1] - ((np.take(track_target, [0, 2])).mean() * RESOLUTION[1]))
@@ -59,12 +73,12 @@ def run_pantilt_detect(center_x, center_y, labels, model_cls, rotation, resoluti
                     RESOLUTION[0] - ((np.take(track_target, [1, 3])).mean() * RESOLUTION[0]))
                 center_x.value = x
 
-                display_name = model.category_index[tracked_classes[0]]['name']
+                display_name = model.category_index[tracked_class]['name']
                 logging.info(
                     f'Tracking {display_name} center_x {x} center_y {y}')
 
-            overlay = model.create_overlay(frame, prediction)
-            capture_manager.overlay_buff = overlay
+                overlay = model.create_overlay(frame, prediction)
+                capture_manager.overlay_buff = overlay
             if LOGLEVEL is logging.DEBUG and (time.time() - start_time) > 1:
                 fps_counter += 1
                 fps = fps_counter / (time.time() - start_time)
