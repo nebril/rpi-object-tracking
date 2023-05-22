@@ -153,19 +153,19 @@ def track(label, loglevel, edge_tpu, rotation):
 @click.option('--rotation', default=0, type=int, help='PiCamera rotation. If you followed this guide, a rotation value of 0 is correct. https://medium.com/@grepLeigh/real-time-object-tracking-with-tensorflow-raspberry-pi-and-pan-tilt-hat-2aeaef47e134')
 def seek(label, loglevel, edge_tpu, rotation):
     '''
-        rpi-deep-pantilt seel [OPTIONS] [LABEL]
+        rpi-deep-pantilt seek [OPTIONS] [LABEL]
 
         LABEL (required)
             Exactly one label to detect, for example:
-            $ rpi-deep-pantilt track person
+            $ rpi-deep-pantilt seek person
 
         Track command will automatically load the appropriate model
 
         For example, providing "face" will initalize FaceSSD_MobileNet_V2 model
-        $ rpi-deep-pantilt track face
+        $ rpi-deep-pantilt seek face
 
         Other labels use SSDMobileNetV3 model with COCO labels
-        $ rpi-deep-pantilt detect orange
+        $ rpi-deep-pantilt seek orange
     '''
     level = logging.getLevelName(loglevel)
     logging.getLogger().setLevel(level)
